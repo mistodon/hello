@@ -1,10 +1,10 @@
 use color_eyre::Result;
 use structopt::StructOpt;
 
-use hello::HelloArgs;
+use hi::HelloArgs;
 
 fn main() -> Result<()> {
     let args = HelloArgs::from_args();
 
-    hello::report(&args)
+    hi::report(&args)
 }

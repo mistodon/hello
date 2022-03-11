@@ -4,7 +4,7 @@ use std::path::*;
 
 use color_eyre::Result;
 use owo_colors::OwoColorize;
-use structopt::StructOpt;
+use structopt::{clap::Shell, StructOpt};
 
 use crate::git::{GitReporter, RepositoryState};
 
@@ -19,6 +19,7 @@ pub struct HelloArgs {
 
 #[derive(StructOpt)]
 pub enum HelloSubCmd {
+    Completion { shell: Shell },
     Freeze { paths: Vec<PathBuf> },
     Unfreeze { paths: Vec<PathBuf> },
 }
@@ -90,6 +91,14 @@ pub fn report(args: &HelloArgs) -> Result<()> {
         Some(HelloSubCmd::Unfreeze { paths }) => {
             validate_paths(paths)?;
             git.set_files_frozen(paths, false)?;
+        }
+        Some(HelloSubCmd::Completion { shell }) => {
+            let mut app = HelloArgs::clap();
+            let mut buffer = vec![];
+            let mut buffer = std::io::Cursor::new(&mut buffer);
+            app.gen_completions_to("hi", *shell, &mut buffer);
+
+            println!("{}", std::str::from_utf8(buffer.into_inner())?);
         }
     }
 
