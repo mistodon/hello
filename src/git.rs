@@ -77,6 +77,25 @@ impl GitReporter {
             .collect())
     }
 
+    pub fn set_files_frozen<P: AsRef<Path>>(&mut self, paths: &[P], frozen: bool) -> Result<()> {
+        let mut index = self.repo.index()?;
+
+        for path in paths {
+            let mut entry = index.get_path(path.as_ref(), 0).unwrap();
+            if frozen {
+                entry.flags |= Self::FREEZE_FLAG;
+            } else {
+                entry.flags &= !Self::FREEZE_FLAG;
+            }
+            index.add(&entry)?;
+        }
+
+        self.repo.set_index(&mut index)?;
+        index.write()?;
+
+        Ok(())
+    }
+
     pub fn staged_files(&self) -> Result<Vec<String>> {
         let modified_flags = Status::INDEX_NEW
             | Status::INDEX_MODIFIED
